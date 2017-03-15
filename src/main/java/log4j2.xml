@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="ERROR">
+	<Properties>
+		<Property name="LOG_HOME">/home/ubuntu/logs</Property>
+		<Property name="LOG_NAME">log.txt</Property>
+	</Properties>
+	<Appenders>
+		<Console name="Console" target="SYSTEM_OUT">
+			<PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n" />
+		</Console>
+		<!-- 按天备份一个日志 -->
+		<!-- fileName为生成的文件名，x为路径，也可以采用相对路径模式，filePattern为时间到达后产生新日志，旧日志的文件名 -->
+		<RollingFile name="TASK" fileName="${LOG_HOME}/${LOG_NAME}"
+			filePattern="${LOG_HOME}/${LOG_NAME}_%d{yyyy-MM-dd}.log">
+			<!-- 输出格式 -->
+			<!-- <PatternLayout -->
+			<!-- pattern="%d{yyyy-MM-dd HH:mm:ss} %-5level [%thread][%file:%line] 
+				- %msg%n" /> -->
+			<PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n" />
+			<Policies>
+
+				<!-- 每1天更新一次，此处查阅网上和官方示例中，都是以小时出现，我测试是以天为单位。（官方文档中说明按item类型是否是小时，但没找到在哪里设置item类型）另有其他各类型策略，请参阅官方文档 -->
+				<TimeBasedTriggeringPolicy modulate="true"
+					interval="1" />
+				<!-- 此处为每个文件大小策略限制，使用它一般会在文件中filePattern采用%i模式 -->
+				<!-- <SizeBasedTriggeringPolicy size="128KB" /> -->
+			</Policies>
+			<!-- 最多备份30天以内的日志，此处为策略限制，Delete中可以按自己需要用正则表达式编写 -->
+			<!-- DefaultRolloverStrategy字段中加入max=“30”经测试是配合SizeBasedTriggeringPolicy限制%i的存在数量，并没有发现是网上流传的是最多保存多少个文件的限制，也或许是我写的有问题 -->
+			<DefaultRolloverStrategy>
+				<Delete basePath="${LOG_HOME}" maxDepth="1">
+					<IfFileName glob="logs_*.log" />
+					<IfLastModified age="30d" />
+				</Delete>
+			</DefaultRolloverStrategy>
+		</RollingFile>
+	</Appenders>
+	<Loggers>
+		<Root level="ERROR">
+			<AppenderRef ref="Console" />
+		</Root>
+		<logger name="dao" level="trace">
+			<AppenderRef ref="TASK" />
+		</logger>
+	</Loggers>
+</Configuration>

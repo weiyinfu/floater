@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="dao.TopicDao">
+  <insert id="insertTopicCare" parameterType="po.TopicPo">
+    insert into
+    topic_care
+    (userId,topicId,createdTime,lastAccessTime)
+    values(#{userId},#{topicId},#{createdTime},#{lastAccessTime})
+  </insert>
+  <insert id="insertTopic" parameterType="po.TopicPo">
+    insert into topic set createdTime=#{createdTime},userId=#{userId},
+    title=#{title},content=#{content},
+    form=#{form}
+    <if test="iconPath!=null">,iconPath=#{iconPath}
+    </if>
+  </insert>
+  <resultMap type="vo.TopicVo" id="topicDetailMap"
+    autoMapping="true">
+    <association property="user" autoMapping="true"
+      javaType="po.UserPo" columnPrefix="user_"></association>
+  </resultMap>
+  <select id="getTopicDetail" resultMap="topicDetailMap">
+  <![CDATA[
+  select topic.*, 
+        user.headImage as user_headImage,
+        user.id as user_id,
+        user.school as user_school,
+        user.major as user_major,
+        user.name as user_name
+  from topic_view as topic,user 
+  where user.id=topic.userId and topic.id=#{topicId}
+  ]]>
+  </select>
+  <select id="getCaredTopicList" resultType="vo.TopicVo">
+  <![CDATA[
+    SELECT topic.*,
+      (SELECT COUNT(*) FROM post WHERE
+            post.topicId = topic.id AND post.createdTime>topic_care.lastAccessTime  
+      ) AS newPostCount
+    FROM
+      topic_view as topic,topic_care
+    WHERE topic_care.userId = #{me} AND topic_care.topicId = topic.id
+    ORDER BY newPostCount desc,topic_care.createdTime desc
+    LIMIT #{beg},#{len}
+  ]]>
+  </select>
+  <select id="getTopicListByForm" resultType="vo.TopicVo">
+  <![CDATA[
+    SELECT * FROM topic_view as topic
+    WHERE topic.form = #{form} and topic.createdTime< #{time}
+    ORDER BY topic.createdTime DESC,topic.id
+    LIMIT #{beg},#{len}
+    ]]>
+  </select>
+  <select id="getTopicListByHot" resultType="vo.TopicVo">
+  <![CDATA[
+    SELECT topic.*,
+    (SELECT COUNT(*) FROM post 
+        WHERE post.topicId = topic.id
+        AND post.createdTime between #{recent} and #{time}) 
+    AS hot
+    FROM topic_view as topic
+    ORDER BY hot DESC,topic.id 
+    LIMIT #{beg},#{len}
+  ]]>
+  </select>
+  <select id="getTopicListByPostCount" resultType="vo.TopicVo">
+  <![CDATA[
+    SELECT topic.*,
+    (SELECT COUNT(*) FROM post 
+      WHERE post.createdTime < #{time} and post.topicId=topic.id)
+    as postCount
+    FROM topic_view as topic
+    ORDER BY postCount DESC,topic.id
+    LIMIT #{beg} , #{len}
+  ]]>
+
+  </select>
+  <select id="getTopicListByTime" resultType="vo.TopicVo">
+  <![CDATA[
+    SELECT * FROM topic_view as topic
+    WHERE  createdTime < #{time}
+    ORDER BY  createdTime DESC,topic.id
+    LIMIT #{beg},#{len}
+    ]]>
+  </select>
+  <select id="getTopicListByTitle" resultType="vo.TopicVo">
+  <![CDATA[
+    SELECT * FROM topic_view as topic
+    WHERE title like #{keyWord}
+    AND topic.createdTime < #{time}
+    ORDER BY length(title),topic.id
+    limit #{beg},#{len}
+    ]]>
+  </select>
+
+  <select id="getTopicListByUser" resultType="vo.TopicVo">
+    <![CDATA[
+      SELECT * FROM topic_view as topic
+      WHERE topic.userId = #{who}
+      ORDER BY topic.createdTime DESC
+      limit #{beg},#{len}
+      ]]>
+  </select>
+</mapper>

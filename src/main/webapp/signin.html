@@ -1,0 +1,81 @@
+<html>
+<head>
+<meta charset="utf-8">
+<link rel='stylesheet' href='a/bootstrap.css' />
+<script type="text/javascript" src='a/jquery.js'></script>
+<script type="text/javascript" src='a/bootstrap.js'></script>
+<script type="text/javascript" src='a/jquery.scrollTo.js'></script>
+<script type="text/javascript" src='a/jquery.cookie.js'></script>
+<script type="text/javascript" src='util.js'></script>
+<link href="mycss/signin.css" rel="stylesheet">
+</head>
+<body>
+  <div class="container">
+    <div style="width: 400px;">
+      <ul id="myTab" class="nav nav-tabs nav-justified">
+        <li class="active"><a href="#loginDiv" data-toggle="tab"> <span>登录</span>
+        </a></li>
+        <li><a href="#registerDiv" data-toggle="tab"> <span>注册</span></a></li>
+      </ul>
+      <div class="tab-content">
+        <div class="tab-pane fade in active" id="loginDiv" onsubmit="return false;">
+          <form class="form-signin" method="POST">
+            <input name="mail" type="email" class="form-control" placeholder="邮箱" required autofocus autocomplete="off">
+            <input type="password" name="password" class="form-control" placeholder="密码" required autocomplete="off">
+            <span class="help-block hidden" style="color: red;">帮助</span>
+            <button id="loginButton" class="btn btn-lg btn-primary btn-block" type="submit">登录</button>
+          </form>
+        </div>
+        <div class="tab-pane fade" id="registerDiv">
+          <form class="form-signin" method="POST">
+            <input type="email" name="mail" class="form-control" placeholder="邮箱" required autofocus autocomplete="off">
+            <input type="password" name="password" class="form-control" placeholder="密码" required autocomplete="off">
+            <span class="help-block hidden" style="color: red;">帮助</span>
+            <button id="registerButton" class="btn btn-lg btn-primary btn-block" type="button">注册</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- /container -->
+  <script>
+			function login() {
+				var data = $("#loginDiv form").serializeArray()
+				$.post("Login", data, function(userId) {
+					console.log(userId)
+					if (userId == -1) {
+						$("#loginDiv .help-block").text("用户名或密码错误")
+								.removeClass("hidden")
+					} else {
+						hideHelpBlock()
+						$.cookie("userId", userId)
+						location = "recommend.jsp"
+					}
+				})
+			}
+			function register() {
+				var data = $("#registerDiv form").serializeArray()
+				$.post("Register", data, function(userId) {
+					console.log(userId)
+					if (userId == -1) {
+						$("#registerDiv .help-block").text("此邮箱已被占用")
+								.removeClass("hidden")
+					} else {
+						hideHelpBlock()
+						$.cookie("userId", userId, userId)
+						location = "me.jsp"
+					}
+				})
+			}
+			function hideHelpBlock() {
+				$(".help-block").addClass("hidden")
+			}
+			var background = Math.round(Math.random() * 10)
+			$("body").css("background-image",
+					"url(background/" + background + ".jpg)")
+			$("#loginButton").click(login)
+			$("#registerButton").click(register)
+			$("input").focus(hideHelpBlock)
+		</script>
+</body>
+</html>

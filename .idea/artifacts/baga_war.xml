@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="war" name="baga:war">
+    <output-path>$PROJECT_DIR$/target</output-path>
+    <root id="archive" name="baga.war">
+      <element id="artifact" artifact-name="baga:war exploded" />
+    </root>
+  </artifact>
+</component>

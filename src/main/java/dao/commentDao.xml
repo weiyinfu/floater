@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="dao.CommentDao">
+  <insert id="insertComment" parameterType="po.CommentPo">
+    insert into comment
+    (userId,postId,content,createdTime)
+    values(#{userId},#{postId},#{content},#{createdTime})
+  </insert>
+  <select id="getCommentList" resultMap="commentMap">
+  <![CDATA[
+    SELECT  comment.*,
+      user.id as user_id,
+      user.name as  user_name,
+      user.headImage as user_headImage,
+      user.school as  user_school,
+      user.major as user_major
+    FROM
+      user,comment
+    WHERE user.id = comment.userId AND comment.postId=#{postId} 
+        and comment.createdTime < #{time}
+    ORDER BY comment.createdTime desc
+    limit #{beg},#{len}
+  ]]>
+  </select>
+  
+  <resultMap type="vo.CommentVo" id="commentMap" autoMapping="true">
+    <association property="user" javaType="vo.UserVo"
+      columnPrefix="user_" autoMapping="true">
+    </association>
+  </resultMap>
+</mapper>

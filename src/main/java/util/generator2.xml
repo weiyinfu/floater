@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE generatorConfiguration
+  PUBLIC "-//mybatis.org//DTD MyBatis Generator Configuration 1.0//EN"
+  "http://mybatis.org/dtd/mybatis-generator-config_1_0.dtd">
+<generatorConfiguration>
+  <context id="haha" targetRuntime="MyBatis3Simple">
+    <jdbcConnection driverClass="com.mysql.jdbc.Driver"
+      connectionURL="jdbc:mysql://localhost/haha" userId="root"
+      password="haha">
+    </jdbcConnection>
+    <javaModelGenerator targetPackage="po"
+      targetProject="src">
+      <property name="enableSubPackages" value="true" />
+    </javaModelGenerator>
+    <table tableName="comment" domainObjectName="CommentPo">
+      <property name="useActualColumnNames" value="true" />
+    </table>
+    <table tableName="flash" domainObjectName="FlashPo">
+      <property name="useActualColumnNames" value="true" />
+    </table>
+    <table tableName="forward" domainObjectName="ForwardPo">
+      <property name="useActualColumnNames" value="true" />
+    </table>
+    <table tableName="post" domainObjectName="PostPo">
+      <property name="useActualColumnNames" value="true" />
+    </table>
+    <table tableName="praise" domainObjectName="PraisePo">
+      <property name="useActualColumnNames" value="true" />
+    </table>
+    <table tableName="topic_care" domainObjectName="TopicCarePo">
+      <property name="useActualColumnNames" value="true" />
+    </table>
+    <table tableName="topic" domainObjectName="TopicPo">
+      <property name="useActualColumnNames" value="true" />
+    </table>
+    <table tableName="user_care" domainObjectName="UserCarePo">
+      <property name="useActualColumnNames" value="true" />
+    </table>
+    <table tableName="user" domainObjectName="UserPo">
+      <property name="useActualColumnNames" value="true" />
+    </table>
+     <table tableName="message" domainObjectName="MessagePo">
+      <property name="useActualColumnNames" value="true" />
+    </table>
+  </context>
+</generatorConfiguration>

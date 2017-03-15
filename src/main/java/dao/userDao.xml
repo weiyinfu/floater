@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="dao.UserDao">
+  <insert id="insertUser" parameterType="po.UserPo">
+    insert into
+    user
+    <set>
+      <if test="headImage!=null">headImage=#{headImage},</if>
+      <if test="name!=null">name=#{name},</if>
+      <if test="sex!=null">sex=#{sex},</if>
+      <if test="school!=null">school=#{school},</if>
+      <if test="major!=null">major=#{major},</if>
+      registerTime=#{registerTime},
+      mail=#{mail},
+      password=#{password}
+    </set>
+  </insert>
+  <update id="updateUserDetail" parameterType="po.UserPo">
+    update user
+    <set>
+      <if test="headImage!=null">headImage=#{headImage},</if>
+      <if test="name!=null">name=#{name},</if>
+      <if test="sex!=null">sex=#{sex},</if>
+      <if test="school!=null">school=#{school},</if>
+      <if test="major!=null">major=#{major}</if>
+    </set>
+    where id=#{id}
+  </update>
+  <sql id="userSimpleInfo">
+    user.id,user.name,user.headImage,user.school,user.major
+  </sql>
+  <select id="getCaredUserList" resultType="vo.UserVo">
+    SELECT
+    <include refid="userSimpleInfo"></include>
+    FROM
+    user,
+    user_care
+    WHERE
+    user.id =
+    user_care.caredUserId
+    AND
+    user_care.userId =
+    #{me}
+    AND
+    user_care.createdTime &lt; #{time}
+    ORDER BY
+    user_care.createdTime
+    DESC
+    LIMIT #{beg},#{len}
+  </select>
+  <select id="getFansList" resultType="vo.UserVo">
+    SELECT
+    <include refid="userSimpleInfo"></include>
+    FROM
+    user,
+    user_care
+    WHERE
+    user_care.caredUserId = #{me}
+    AND user.id =
+    user_care.userId
+    AND
+    user_care.createdTime &lt; #{time}
+    ORDER BY
+    user_care.createdTime DESC
+    LIMIT #{beg},#{len}
+  </select>
+  <select id="getPraiseUserList" resultType="vo.UserVo">
+    SELECT
+    <include refid="userSimpleInfo"></include>
+    FROM
+    user,
+    praise
+    WHERE
+    user.id = praise.userId
+    AND praise.postId =
+    #{postId}
+    AND
+    praise.createdTime &lt; #{time}
+    ORDER BY
+    praise.createdTime DESC
+    LIMIT
+    #{beg},#{len}
+  </select>
+  <select id="getForwardUserList" resultType="vo.UserVo">
+    SELECT
+    <include refid="userSimpleInfo"></include>
+    FROM
+    user,
+    forward
+    WHERE
+    user.id = forward.userId
+    AND forward.postId =
+    #{postId}
+    AND
+    forward.createdTime &lt; #{time}
+    ORDER BY
+    forward.createdTime DESC
+    LIMIT
+    #{beg},#{len}
+  </select>
+
+  <select id="getUserListByName" resultType="vo.UserVo">
+    SELECT
+    <include refid="userSimpleInfo"></include>
+    FROM
+    user
+    WHERE
+    user.name LIKE #{keyWord}
+    AND
+    user.registerTime &lt;
+    #{time}
+    ORDER BY
+    LENGTH(user.name)
+    DESC,user.id
+    LIMIT
+    #{beg},#{len}
+  </select>
+</mapper>
+

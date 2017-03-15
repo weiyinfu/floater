@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="dao.PostDao">
+  <resultMap type="vo.PostVo" id="postMap" autoMapping="true">
+    <association property="user" autoMapping="true"
+      columnPrefix="user_" javaType="po.UserPo"></association>
+    <association property="topic" autoMapping="true"
+      columnPrefix="topic_" javaType="po.TopicPo"></association>
+  </resultMap>
+  <insert id="insertPost" parameterType="po.PostPo">
+    insert into post
+    (userId,topicId,createdTime,mediaPath,content)values
+    (#{userId},#{topicId},#{createdTime},#{mediaPath},#{content})
+  </insert>
+  <select id="getPostDetail" resultMap="postMap">
+  <![CDATA[
+   SELECT 
+      post.*, 
+      author.id AS authorId,
+      author.name AS authorName,
+      null AS lastUserId,
+      null AS lastUserName,
+      null as forwardTime,
+      post.createdTime as realTime,
+      nowuser.name as user_name,
+      nowuser.headImage as user_headImage,
+      nowuser.school as user_school,
+      nowuser.major as user_major,
+      nowuser.id as user_id,
+      topic.id as topic_id,
+      topic.content as topic_content,
+      topic.form as topic_form,
+      topic.iconPath as topic_iconPath,
+      topic.title as topic_title,
+      ((select id from praise where userId=#{me} and postId=post.id)
+         is not null) as hasPraised,
+      ((select id from forward where userId=#{me} and postId=post.id)
+         is not null) as hasForwarded
+  FROM
+      post_view as post,
+      topic, 
+      user AS author,
+      user as nowuser
+  WHERE
+      post.id = #{postId} and 
+      nowuser.id=post.userId and
+      topic.id=post.topicId and
+      author.id = post.userId
+  ]]>
+
+  </select>
+
+  <select id="getCaredPostList" resultMap="postMap">
+  <![CDATA[
+  SELECT 
+      post.*,
+      topic.id AS topic_id,
+      topic.title AS topic_title,
+      topic.iconPath AS topic_iconPath,
+      topic.form AS topic_form,
+      nowuser.id AS user_id,
+      nowuser.headImage AS user_headImage,
+      nowuser.name AS user_name,
+      nowuser.school AS user_school,
+      nowuser.major AS user_major,
+      author.id AS authorId,
+      author.name AS authorName,
+      cared_post.lastUserId,
+      cared_post.lastUserName, 
+      cared_post.forwardTime,
+      cared_post.realTime,
+      ((select id from praise where userId=#{me} and postId=post.id)
+           is not null) as hasPraised,
+      ((select id from forward where userId=#{me} and postId=post.id)
+           is not null) as hasForwarded
+  FROM
+      post_view as post,
+      topic,
+      user AS nowUser,
+      user AS author,
+      (SELECT * FROM user_post WHERE userId IN 
+          (SELECT  caredUserId  FROM  user_care
+              WHERE  userId = #{me})
+      ) AS cared_post
+  WHERE
+      post.id = cared_post.postId
+      AND topic.id = post.topicId
+      AND nowUser.id = cared_post.userId
+      AND author.id = post.userId
+      AND realTime < #{time}
+  ORDER BY realTime DESC , post.id
+  LIMIT #{beg},#{len}
+  ]]>
+
+  </select>
+  <select id="getPostListByTopic" resultMap="postMap">
+  <![CDATA[
+    SELECT post.*,
+      topic.id as topic_id,
+      topic.title as topic_title,
+      topic.iconPath as topic_iconPath,
+      topic.form as topic_form,
+      nowuser.id as user_id,
+      nowuser.headImage as  user_headImage,
+      nowuser.name as user_name,
+      nowuser.school as  user_school,
+      nowuser.major as user_major,
+      nowuser.id  as authorId,
+      nowuser.name as   authorName,
+      NULL AS lastUserId,
+      NULL AS  lastUserName,
+      ((SELECT id  FROM  forward WHERE userId = #{me} 
+          AND postId =post.id) IS NOT NULL) AS hasForwarded,
+      ((SELECT id FROM praise WHERE userId =#{me} 
+          AND postId =post.id) IS NOT NULL) AS hasPraised,
+      NULL AS forwardTime,
+      post.createdTime AS realTime
+    FROM post_view as post,
+      topic,
+      user AS nowuser
+    WHERE post.userId = nowuser.id
+      AND post.topicId = topic.id
+      AND topic.id = #{topicId}
+      AND post.createdTime < #{time}
+    ORDER BY post.createdTime DESC,post.id
+    LIMIT #{beg},#{len}
+  ]]>
+  </select>
+  <select id="getPostListOrderedByColumn" resultMap="postMap">
+  <![CDATA[
+    SELECT post.*,
+      topic.id as topic_id,
+      topic.title as topic_title,
+      topic.iconPath as topic_iconPath,
+      topic.form as topic_form,
+      nowuser.id as user_id,
+      nowuser.headImage as  user_headImage,
+      nowuser.name as user_name,
+      nowuser.school as  user_school,
+      nowuser.major as user_major,
+      nowuser.id  as authorId,
+      nowuser.name as   authorName,
+      NULL AS lastUserId,
+      NULL AS  lastUserName,
+      ((SELECT id  FROM  forward WHERE userId = #{me} 
+          AND postId =post.id) IS NOT NULL) AS hasForwarded,
+      ((SELECT id FROM praise WHERE userId =#{me} 
+          AND postId =post.id) IS NOT NULL) AS hasPraised,
+      NULL AS forwardTime,
+      post.createdTime AS realTime
+    FROM post_view as post,
+      topic,
+      user AS nowuser
+    WHERE post.userId = nowuser.id
+      AND post.topicId = topic.id
+      AND post.createdTime < #{time}
+    ORDER BY post.${column} DESC,post.id
+    LIMIT #{beg},#{len}
+  ]]>
+  </select>
+
+  <select id="getPostListByUser" resultMap="postMap">
+  <![CDATA[
+SELECT 
+    post.*,
+    topic.id AS topic_id,
+    topic.title AS topic_title,
+    topic.iconPath AS topic_iconPath,
+    topic.form AS topic_form,
+    nowuser.id AS user_id,
+    nowuser.headImage AS user_headImage,
+    nowuser.name AS user_name,
+    nowuser.school AS user_school,
+    nowuser.major AS user_major,
+    author.id as authorId,
+    author.name as authorName,
+    cared_post.lastUserId,
+    cared_post.lastUserName, 
+    cared_post.forwardTime,
+    cared_post.realTime,
+    ((select id from praise where userId=#{me} and postId=post.id)
+           is not null) as hasPraised,
+    ((select id from forward where userId=#{me} and postId=post.id)
+           is not null) as hasForwarded
+FROM
+    post_view as post,
+    topic,
+    (SELECT * FROM user WHERE id = #{who}) AS nowUser,
+    user AS author,
+    (SELECT  * FROM user_post WHERE userId = #{who}) AS cared_post
+WHERE
+    post.id = cared_post.postId
+        AND topic.id = post.topicId
+        AND author.id = post.userId
+        AND realTime < #{time}
+ORDER BY realTime DESC , post.id
+LIMIT #{beg},#{len}
+  ]]>
+  </select>
+</mapper> 

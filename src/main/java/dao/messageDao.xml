@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="dao.MessageDao">
+  <insert id="insertMessage">
+  <![CDATA[
+  insert into message
+  set createdTime=#{createdTime},
+      srcUserId=#{srcUserId},
+      desUserId=#{desUserId},
+      content=#{content}
+  ]]>
+  </insert>
+  <resultMap type="vo.MessageVo" id="messageResultMap">
+    <association property="desUser" column="desUserId"
+      select="getUserPo"></association>
+    <association property="srcUser" column="srcUserId"
+      select="getUserPo"></association>
+  </resultMap>
+  <select id="getMessageListOfUser" resultMap="messageResultMap">
+    select * from
+    message where desUserId=#{userId}
+  </select>
+  <select id="getUserPo" resultType="po.UserPo">
+    select * from user where
+    id=#{userId}
+  </select>
+</mapper>
